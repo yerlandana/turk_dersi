@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kelime Oyunu by yerlandana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout idea: one narrow column, a catalogue of game modes set like a tile-maker's price list, Iznik star tile behind. */
+  --bg:#0F2259;
+  --surface:#183170;
+  --line:#2E4A9E;
+  --text:#F5F1E6;
+  --muted:#A8B5E2;
+  --accent:#F2B84B;
+  --accent-ink:#1A1405;
+  --good:#43D19E;
+  --bad:#FF6B57;
+  --turq:#34B8C9;
+  --display:"DM Serif Display",Georgia,"Times New Roman",serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background-color:var(--bg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cg fill='none' stroke='%232E4A9E' stroke-opacity='.45' stroke-width='1'%3E%3Crect x='18' y='18' width='36' height='36'/%3E%3Crect x='18' y='18' width='36' height='36' transform='rotate(45 36 36)'/%3E%3Ccircle cx='36' cy='36' r='5'/%3E%3C/g%3E%3C/svg%3E");
+  color:var(--text);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.45;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 72px}
+h1,h2,h3,p{margin:0}
+
+/* top */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.brand{font-family:var(--display);font-size:20px;letter-spacing:.01em;display:flex;flex-direction:column;line-height:1.1}
+.brand small{font-family:var(--body);font-size:12px;color:var(--accent);letter-spacing:.04em;margin-top:2px}
+.byline{color:var(--accent);font-weight:600;margin-top:8px;letter-spacing:.03em}
+.chip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:6px 14px 6px 8px;max-width:60%}
+.chip .av{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;flex:none}
+.chip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.chip .lv{color:var(--muted);font-size:13px;white-space:nowrap}
+.tabs{display:flex;gap:24px;border-bottom:1.5px solid var(--line);margin:8px 0 20px}
+.tab{background:none;border:0;padding:10px 0;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1.5px}
+.tab[aria-selected="true"]{color:var(--text);border-color:var(--accent)}
+
+/* home */
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(46px,14vw,68px);line-height:.98;letter-spacing:-.01em;text-wrap:balance}
+.hero p{color:var(--muted);margin-top:10px;max-width:42ch}
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 6px}
+.pill{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;color:var(--muted)}
+.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pill:disabled{opacity:.4;cursor:not-allowed}
+.modes{list-style:none;margin:10px 0 0;padding:0;border-top:1.5px solid var(--line)}
+.mode{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:none;border:0;border-bottom:1.5px solid var(--line);padding:16px 4px;border-radius:0;transition:background .15s}
+.mode:hover,.mode:focus-visible{background:rgba(255,255,255,.05)}
+.mode .mt{flex:1;min-width:0}
+.mode .mn{display:block;font-size:19px;font-weight:700}
+.mode .md{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.mode .mb{font-family:var(--display);font-size:30px;line-height:1;color:var(--accent);text-align:right;min-width:48px}
+.mode .mb small{display:block;font-family:var(--body);font-size:11px;color:var(--muted);letter-spacing:.04em;margin-top:4px}
+.mode:disabled{opacity:.45;cursor:not-allowed}
+.note{color:var(--muted);font-size:14px;margin-top:14px}
+
+/* generic */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:14px 22px;font-weight:700;background:var(--accent);color:var(--accent-ink);min-height:50px}
+.btn.alt{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.ghost{background:none;border:0;color:var(--muted);display:inline-flex;align-items:center;gap:6px;padding:8px 6px;font-weight:600}
+svg.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* game */
+.gamehead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.gamehead .gtitle{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gamehead .meta{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.bar{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.stage{display:flex;flex-direction:column;gap:14px}
+.tag{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--turq)}
+.prompt{font-family:var(--display);font-size:clamp(40px,12vw,58px);line-height:1.04;text-wrap:balance;overflow-wrap:anywhere}
+.prompt.ru{font-family:var(--body);font-weight:700;font-size:clamp(30px,8.5vw,40px);line-height:1.12}
+.sub{color:var(--muted);min-height:1.4em}
+.opts{display:grid;gap:10px;margin-top:6px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:56px;padding:12px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;font-size:18px;font-weight:500;transition:transform .08s,border-color .15s,background .15s}
+.opt:active:not(:disabled){transform:scale(.985)}
+.opt kbd{font:600 12px var(--body);color:var(--muted);border:1.5px solid var(--line);border-radius:6px;padding:1px 7px;flex:none}
+.opt.tr{font-family:var(--display);font-size:22px;font-weight:400}
+.opt.good{background:rgba(67,209,158,.18);border-color:var(--good)}
+.opt.bad{background:rgba(255,107,87,.18);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fb .msg{font-weight:700}
+.fb .msg.good{color:var(--good)}
+.fb .msg.bad{color:var(--bad)}
+.fb .msg.mid{color:var(--accent)}
+.say{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:var(--surface);border:1.5px solid var(--line);flex:none}
+.say.big{width:96px;height:96px;background:var(--accent);color:var(--accent-ink);border:0}
+.say.big svg{width:40px;height:40px}
+.streak{color:var(--accent);font-weight:700;font-size:14px;min-height:1.3em}
+
+/* flashcard */
+.card3d{perspective:900px}
+.card{position:relative;min-height:240px;border-radius:22px;border:1.5px solid var(--line);background:var(--surface);display:flex;flex-direction:column;justify-content:center;gap:10px;padding:26px 22px;width:100%;text-align:left}
+.card .hint{position:absolute;right:18px;bottom:14px;color:var(--muted);font-size:13px}
+.card.back{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card.back .tag{color:#5B3F05}
+.rate{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* write */
+.field{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;font-family:var(--display);font-size:28px}
+.field.good{border-color:var(--good)}
+.field.bad{border-color:var(--bad)}
+.keys{display:flex;gap:8px;flex-wrap:wrap}
+.key{min-width:44px;height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-family:var(--display);font-size:22px}
+.reveal{font-family:var(--display);font-size:30px}
+.reveal mark{background:none;color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+
+/* letters */
+.slots{display:flex;flex-wrap:wrap;gap:6px;min-height:52px}
+.slot{width:40px;height:48px;border-radius:10px;border:1.5px dashed var(--line);display:grid;place-items:center;font-family:var(--display);font-size:26px;background:transparent}
+.slot.fill{border-style:solid;background:var(--surface)}
+.slot.good{border-color:var(--good);background:rgba(67,209,158,.18)}
+.slot.bad{border-color:var(--bad);background:rgba(255,107,87,.18)}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.tile{width:48px;height:52px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-size:26px}
+.tile:disabled{opacity:.25}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .35s}
+
+/* match */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mt{aspect-ratio:3/2;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:6px;text-align:center;font-weight:600;line-height:1.15;overflow-wrap:anywhere;font-size:15px}
+.mt.down{background:repeating-linear-gradient(45deg,var(--surface) 0 8px,#1E3B87 8px 16px);color:transparent}
+.mt.tr{font-family:var(--display);font-weight:400;font-size:20px}
+.mt.up{border-color:var(--accent)}
+.mt.done{border-color:var(--good);background:rgba(67,209,158,.18)}
+
+/* blitz */
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tf .btn{min-height:64px;font-size:18px}
+.tf .no{background:var(--bad);color:#2A0A05}
+.tf .yes{background:var(--good);color:#032A1C}
+.flash-good{box-shadow:0 0 0 3px var(--good) inset}
+.flash-bad{box-shadow:0 0 0 3px var(--bad) inset}
+.pairbox{border:1.5px solid var(--line);border-radius:18px;padding:20px;background:var(--surface);transition:box-shadow .1s}
+
+/* result */
+.score{font-family:var(--display);font-size:clamp(84px,28vw,128px);line-height:.9;color:var(--accent)}
+.stats{display:flex;gap:22px;flex-wrap:wrap;color:var(--muted)}
+.stats b{display:block;color:var(--text);font-size:22px;font-variant-numeric:tabular-nums}
+.badge{align-self:flex-start;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:999px;padding:4px 12px;font-size:13px}
+.missed{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--line)}
+.missed li{display:flex;justify-content:space-between;gap:12px;padding:10px 2px;border-bottom:1.5px solid var(--line)}
+.missed .a{font-family:var(--display);font-size:20px}
+.missed .b{color:var(--muted);text-align:right}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* board */
+.seg{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px}
+.seg .pill{white-space:nowrap}
+.rows{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1.5px solid var(--line)}
+.row .rk{width:34px;font-family:var(--display);font-size:24px;color:var(--muted);text-align:right}
+.row:nth-child(1) .rk{color:var(--accent)}
+.row .rn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.row .rv{font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums}
+.row.me{background:rgba(242,184,75,.14)}
+.row.gap{justify-content:center;color:var(--muted);padding:4px}
+.empty{color:var(--muted);padding:26px 4px}
+
+/* name */
+.namebox{display:flex;flex-direction:column;gap:14px;margin-top:34px}
+.namebox .field{font-family:var(--body);font-size:22px;font-weight:600}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (min-width:520px){.opts.two{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+(function(){
+'use strict';
+
+/* ---------- data: Yeni Istanbul A2, kelime listesi ---------- */
+var RAW = [
+'ahşap|деревянный|n','aniden|внезапно|n','asker|солдат|n','Avrupa|Европа|n','baharatlı|пряный, острый|n','bal|мёд|n','bambu|бамбук|n','başbakan|премьер-министр|n','belediye|муниципалитет, мэрия|n','bölge|регион|n','bülbül|соловей|n','çadır|палатка|n','çekirdek|косточка, ядро|n','çevre|окружающая среда|n','çiftçi|фермер|n','dağ|гора|n','dizi|сериал|n','doğum günü|день рождения|n','döner|донер|n','dürüst|честный|n','eldiven|перчатка|n','eş|супруг, супруга|n','etkinlik|мероприятие|n','ev planı|план дома|n','fal|гадание|n','faydalı|полезный|n','ferah|просторный, свежий|n','festival|фестиваль|n','gelenek|традиция|n','gösteri|шоу, показ|n','güneşli|солнечный|n','harika|великолепный|n','hastane|больница|n','hava|погода, воздух|n','hayal|мечта|n','hediye|подарок|n','ılık|тёплый (умеренно)|n','icat|изобретение|n',
+'inatçı|упрямый|n','izleyici|зритель|n','jimnastik|гимнастика|n','kaban|бушлат, куртка|n','kampanya|акция, кампания|n','kar|снег|n','katedral|собор|n','kazak|свитер|n','kıyı|берег|n','kıymet|ценность|n','klozet|унитаз|n','mahalli|местный|n','makyaj|макияж|n','merasim|церемония|n','mercimek|чечевица|n','mesai|рабочие часы|n','metrekare|квадратный метр|n','mısır|кукуруза|n','mimar|архитектор|n','mobilya|мебель|n','nehir|река|n','nemli|влажный|n','oğul|сын|n','okyanus|океан|n','ödeme|оплата|n','padişah|султан|n','pamuk|хлопок|n','piramit|пирамида|n','plaj|пляж|n','robot|робот|n','romatizma|ревматизм|n','sağanak|ливень|n','sahil|побережье|n','sakal|борода|n','satılık|продаётся|n','saygı|уважение|n','seçim|выборы|n','semt|район города|n','serin|прохладный|n','sınav|экзамен|n',
+'sirk|цирк|n','sisli|туманный|n','soslu|с соусом|n','sosyal|общительный|n','sörf|сёрфинг|n','stant|стенд|n','şelale|водопад|n','tapınak|храм|n','tarla|поле|n','taş|камень|n','torun|внук|n','tur|тур|n','tuş|клавиша|n','vaat|обещание|n','vakit|время, пора|n','valiz|чемодан|n','vize|виза|n','yağmurluk|дождевик|n','yanardağ|вулкан|n','yoğunluk|плотность|n','yosun|водоросль|n','yöresel|региональный|n','yurt|общежитие|n',
+'anlaşmak|договориться|v','artmak|увеличиваться|v','azalmak|уменьшаться|v','balık tutmak|ловить рыбу|v','boyamak|красить|v','çağırmak|звать, приглашать|v','çalıştırmak|запускать, заставлять работать|v','çizmek|рисовать, чертить|v','dalmak|нырять|v','değiştirmek|менять|v','düzenlemek|организовывать|v','geçirmek|проводить (время)|v','geçmek|проходить, миновать|v','gerçekleştirmek|осуществлять|v','gezmek|гулять, путешествовать|v','görüşmek|встречаться, общаться|v','güneşlenmek|загорать|v','ikna etmek|убеждать|v','iptal olmak|отменяться|v','kaçmak|убегать|v','karar vermek|принять решение|v','kartopu oynamak|играть в снежки|v','katılmak|участвовать|v','kayak yapmak|кататься на лыжах|v','kürek çekmek|грести|v','tahmin etmek|предполагать|v','takmak|надевать, вставлять|v','tıraş olmak|бриться|v','tükenmek|заканчиваться, иссякать|v'
+];
+var WORDS = RAW.map(function(l){var p=l.split('|');return {tr:p[0],ru:p[1],t:p[2]}});
+
+var MODES = [
+  {id:'cards',  name:'Карточки',        desc:'Переверни, вспомни, оцени себя'},
+  {id:'tr2ru',  name:'Выбери перевод',  desc:'Слово по-турецки, значение на выбор'},
+  {id:'ru2tr',  name:'Обратный выбор',  desc:'Русское слово, найди турецкое'},
+  {id:'listen', name:'На слух',         desc:'Слушай и выбирай значение'},
+  {id:'write',  name:'Напиши слово',    desc:'Печатай по-турецки, буквы ç ğ ı ö ş ü рядом'},
+  {id:'match',  name:'Найди пару',      desc:'Мемори на 12 плиток, чем меньше ходов, тем лучше'},
+  {id:'letters',name:'Собери из букв',  desc:'Составь слово из перемешанных букв'},
+  {id:'blitz',  name:'Блиц, 60 секунд', desc:'Верно или неверно на скорость'}
+];
+var MODE = {}; MODES.forEach(function(m){MODE[m.id]=m});
+
+/* ---------- helpers ---------- */
+function h(tag, props){
+  var e=document.createElement(tag), k, i, kids=Array.prototype.slice.call(arguments,2);
+  props=props||{};
+  for(k in props){
+    var v=props[k];
+    if(k==='class') e.className=v;
+    else if(k.indexOf('on')===0) e.addEventListener(k.slice(2),v);
+    else if(k==='html') e.innerHTML=v; /* only trusted static icons */
+    else if(v!==false && v!=null) e.setAttribute(k, v===true?'':v);
+  }
+  (function add(list){
+    for(i=0;i<list.length;i++){
+      var c=list[i];
+      if(c==null||c===false) continue;
+      if(Array.isArray(c)) add(c);
+      else e.appendChild(c.nodeType?c:document.createTextNode(String(c)));
+    }
+  })(kids);
+  return e;
+}
+var ICONS={
+  back:'<svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>',
+  speak:'<svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/></svg>'
+};
+function icon(n){return h('span',{html:ICONS[n],style:'display:inline-flex'})}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function lc(s){try{return s.toLocaleLowerCase('tr')}catch(e){return s.toLowerCase()}}
+function norm(s){return lc(s).replace(/\s+/g,' ').trim()}
+function plain(s){return norm(s).replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u')}
+function level(xp){return Math.floor(xp/250)+1}
+
+var timers=[], ints=[];
+function later(fn,ms){var id=setTimeout(fn,ms);timers.push(id);return id}
+function every(fn,ms){var id=setInterval(fn,ms);ints.push(id);return id}
+function clearTimers(){timers.forEach(clearTimeout);ints.forEach(clearInterval);timers=[];ints=[];document.onkeydown=null}
+
+/* Pronunciation: pre-recorded neural Turkish mp3s (audio/, made by tools/make_audio.py);
+   browser speech is only a fallback, and only with a real Turkish voice. */
+var AUDIO={}, curAudio=null;
+try{fetch('audio/index.json').then(function(r){return r.ok?r.json():{}}).then(function(j){AUDIO=j||{}}).catch(function(){})}catch(e){}
+var hasTTS=false; try{hasTTS=('speechSynthesis' in window)&&typeof SpeechSynthesisUtterance!=='undefined'}catch(e){}
+var canSpeak=true;
+var trVoice=null;
+function pickVoice(){
+  try{
+    var vs=speechSynthesis.getVoices()||[], best=null, score=-1;
+    vs.forEach(function(v){
+      var l=(v.lang||'').toLowerCase().replace('_','-'); if(l.indexOf('tr')!==0) return;
+      var s=(/natural|neural|online|google|premium|enhanced/i.test(v.name)?2:0)+(l==='tr-tr'?1:0);
+      if(s>score){score=s;best=v}
+    });
+    trVoice=best;
+  }catch(e){}
+}
+if(hasTTS){pickVoice(); try{speechSynthesis.onvoiceschanged=pickVoice}catch(e){}}
+function speakTTS(t){
+  if(!hasTTS) return;
+  try{
+    if(!trVoice) pickVoice();
+    var u=new SpeechSynthesisUtterance(t); u.lang='tr-TR'; u.rate=.9; if(trVoice) u.voice=trVoice;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speak(t){
+  var f=AUDIO[t];
+  if(f){
+    try{
+      if(curAudio){curAudio.pause()}
+      if(hasTTS) speechSynthesis.cancel();
+      curAudio=new Audio('audio/'+f);
+      var p=curAudio.play(); if(p&&p.catch) p.catch(function(){speakTTS(t)});
+      return;
+    }catch(e){}
+  }
+  speakTTS(t);
+}
+function sayBtn(word,big){
+  return h('button',{class:'say'+(big?' big':''),'aria-label':'Прослушать',onclick:function(ev){ev.stopPropagation();speak(word)}},icon('speak'));
+}
+
+/* ---------- player state ---------- */
+var LS='kelime.v1', MS='kelime.miss';
+var P={name:'',xp:0,best:{},played:0};
+try{var s=JSON.parse(localStorage.getItem(LS)||'null'); if(s&&typeof s==='object'){P.name=String(s.name||'').slice(0,20);P.xp=+s.xp||0;P.best=s.best&&typeof s.best==='object'?s.best:{};P.played=+s.played||0}}catch(e){}
+var miss={}; try{(JSON.parse(localStorage.getItem(MS)||'[]')||[]).forEach(function(w){miss[w]=1})}catch(e){}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(P));localStorage.setItem(MS,JSON.stringify(Object.keys(miss)))}catch(e){}}
+function missCount(){return Object.keys(miss).length}
+
+var S={view:P.name?'home':'name',tab:'play',pool:'all',boardKey:'xp',rows:[],db:'off',canWrite:true,uid:null};
+
+function poolWords(){
+  var p=S.pool;
+  if(p==='n'||p==='v') return WORDS.filter(function(w){return w.t===p});
+  if(p==='miss') return WORDS.filter(function(w){return miss[w.tr]});
+  return WORDS;
+}
+function take(n,filter){
+  var base=poolWords(); if(filter) base=base.filter(filter);
+  var out=shuffle(base).slice(0,n);
+  if(out.length<n){
+    var rest=shuffle(WORDS.filter(function(w){return out.indexOf(w)<0&&(!filter||filter(w))}));
+    out=out.concat(rest.slice(0,n-out.length));
+  }
+  return out;
+}
+function distractors(w,n){return shuffle(WORDS.filter(function(x){return x!==w&&x.t===w.t&&x.ru!==w.ru})).slice(0,n)}
+function noteMiss(w){miss[w.tr]=1;saveLocal()}
+function noteHit(w){if(miss[w.tr]){delete miss[w.tr];saveLocal()}}
+
+/* ---------- shared leaderboard via Streamlit bridge ---------- */
+var bridge={ready:false};
+function stSend(type,extra){try{window.parent.postMessage(Object.assign({isStreamlitMessage:true,type:type},extra||{}),'*')}catch(e){}}
+function myUid(){
+  try{var u=localStorage.getItem('kelime.uid');if(!u){u='p'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem('kelime.uid',u)}return u}
+  catch(e){return 'p'+Math.random().toString(36).slice(2,12)+Date.now().toString(36)}
+}
+function fitFrame(){var hgt=Math.ceil($app.getBoundingClientRect().height)+48;stSend('streamlit:setFrameHeight',{height:Math.max(hgt,640)})}
+function pushRemote(){
+  if(!bridge.ready||!P.name) return;
+  stSend('streamlit:setComponentValue',{dataType:'json',value:{uid:S.uid,name:P.name,xp:P.xp,best:P.best,played:P.played,nonce:Date.now()+':'+Math.random().toString(36).slice(2,6)}});
+}
+function onRows(rows){
+  S.rows=rows.map(function(x){return {id:String(x.id),name:String(x.name||'Игрок').slice(0,20),xp:+x.xp||0,best:(x.best&&typeof x.best==='object')?x.best:{}}});
+  S.db='live';
+  var mine=S.rows.filter(function(r){return r.id===S.uid})[0];
+  if(mine){
+    if(mine.xp>P.xp){P.xp=mine.xp}
+    for(var k in mine.best){if(+mine.best[k]>(P.best[k]||0))P.best[k]=+mine.best[k]}
+    saveLocal();
+  }
+}
+function initDb(){
+  S.uid=myUid(); S.db='loading';
+  window.addEventListener('message',function(ev){
+    var d=ev.data; if(!d||d.type!=='streamlit:render') return;
+    var a=d.args||{}; var first=!bridge.ready; bridge.ready=true;
+    if(Array.isArray(a.rows)) onRows(a.rows);
+    if(first&&P.name&&(P.xp||P.played)) pushRemote();
+    if(S.view==='board'||S.view==='home') render();
+    fitFrame();
+  });
+  stSend('streamlit:componentReady',{apiVersion:1});
+  try{new ResizeObserver(fitFrame).observe($app)}catch(e){}
+  setTimeout(function(){if(S.db==='loading'){S.db='off';if(S.view==='board')render()}},6000);
+}
+
+/* ---------- views ---------- */
+var $app=document.getElementById('app');
+function go(v,extra){clearTimers();S.view=v;if(extra)for(var k in extra)S[k]=extra[k];render();window.scrollTo(0,0)}
+function render(){
+  if(S.view==='name') return viewName();
+  if(S.view==='home'||S.view==='board') return viewMain();
+}
+
+function topbar(){
+  var initial=(P.name||'?').trim().charAt(0).toUpperCase();
+  return h('div',{class:'top'},
+    h('div',{class:'brand'},'Kelime Oyunu',h('small',{},'by yerlandana')),
+    h('button',{class:'chip','aria-label':'Сменить имя',onclick:function(){go('name')}},
+      h('span',{class:'av'},initial),
+      h('span',{class:'nm'},P.name),
+      h('span',{class:'lv'},'ур. '+level(P.xp)))
+  );
+}
+function viewMain(){
+  var tabs=h('div',{class:'tabs',role:'tablist'},
+    h('button',{class:'tab',role:'tab','aria-selected':S.view==='home',onclick:function(){go('home')}},'Играть'),
+    h('button',{class:'tab',role:'tab','aria-selected':S.view==='board',onclick:function(){go('board')}},'Рейтинг'));
+  $app.replaceChildren(topbar(),tabs,S.view==='home'?homeBody():boardBody());
+}
+
+function homeBody(){
+  var nMiss=missCount();
+  var pools=[['all','Все слова ('+WORDS.length+')'],['n','Существительные и прилагательные'],['v','Глаголы'],['miss','Мои ошибки ('+nMiss+')']];
+  var el=h('div',{},
+    h('div',{class:'hero'},
+      h('h1',{},'Kelime Oyunu'),
+      h('div',{class:'byline'},'by yerlandana'),
+      h('p',{},'Слова из списка Yeni İstanbul A2. Восемь режимов, очки идут в общий рейтинг.')),
+    h('div',{class:'pool',role:'group','aria-label':'Какие слова учить'},pools.map(function(p){
+      return h('button',{class:'pill','aria-pressed':S.pool===p[0],disabled:p[0]==='miss'&&nMiss<4,onclick:function(){S.pool=p[0];render()}},p[1]);
+    })),
+    h('div',{class:'modes'},MODES.map(function(m){
+      var best=P.best[m.id], dis=(m.id==='listen'&&!canSpeak);
+      return h('button',{class:'mode',disabled:dis,onclick:function(){startMode(m.id)}},
+        h('span',{class:'mt'},h('span',{class:'mn'},m.name),h('span',{class:'md'},dis?'Нет озвучки на этом устройстве':m.desc)),
+        h('span',{class:'mb'},best?String(best):'new',h('small',{},best?'рекорд':'новый')));
+    })),
+    nMiss<4?h('p',{class:'note'},'Слова, в которых ошибёшься, соберутся в пул «Мои ошибки». Он откроется, когда их станет четыре.'):null);
+  return el;
+}
+
+function boardBody(){
+  var keys=[['xp','Всего очков']].concat(MODES.filter(function(m){return m.id!=='cards'}).map(function(m){return [m.id,m.name]}));
+  var rows=S.rows.slice();
+  var meRow={id:S.uid||'me',name:P.name,xp:P.xp,best:P.best,me:true};
+  var hasMe=false;
+  rows=rows.map(function(r){if(S.uid&&r.id===S.uid){hasMe=true;return {id:r.id,name:P.name||r.name,xp:Math.max(r.xp,P.xp),best:P.best,me:true}}return r});
+  if(!hasMe&&(P.xp>0)) rows.push(meRow);
+  var key=S.boardKey;
+  function val(r){return key==='xp'?r.xp:(r.best&&+r.best[key])||0}
+  rows=rows.filter(function(r){return val(r)>0}).sort(function(a,b){return val(b)-val(a)});
+  var list=[], shown=rows.slice(0,50), meIdx=-1;
+  rows.forEach(function(r,i){if(r.me)meIdx=i});
+  shown.forEach(function(r,i){list.push(rowEl(i+1,r,val(r)))});
+  if(meIdx>=50){list.push(h('li',{class:'row gap'},'...'));list.push(rowEl(meIdx+1,rows[meIdx],val(rows[meIdx])))}
+  var status=null;
+  if(S.db==='off') status='Общий рейтинг сейчас недоступен. Показываю твой результат на этом устройстве.';
+  else if(S.db==='loading') status='Загружаю общий рейтинг...';
+  else if(S.db==='slow') status='Рейтинг долго не отвечает. Показываю то, что есть.';
+  else if(S.db==='error') status='Не удалось загрузить общий рейтинг. Показываю твой результат.';
+  return h('div',{},
+    h('div',{class:'seg',role:'group','aria-label':'Таблица'},keys.map(function(k){
+      return h('button',{class:'pill','aria-pressed':key===k[0],onclick:function(){S.boardKey=k[0];render()}},k[1]);
+    })),
+    list.length?h('ol',{class:'rows'},list):h('div',{class:'empty'},'Здесь пока пусто. Сыграй раунд, и ты окажешься первым.'),
+    status?h('p',{class:'note'},status):null);
+}
+function rowEl(rank,r,v){
+  return h('li',{class:'row'+(r.me?' me':'')},h('span',{class:'rk'},String(rank)),h('span',{class:'rn'},r.name+(r.me?' (ты)':'')),h('span',{class:'rv'},String(v)));
+}
+
+function viewName(){
+  var input=h('input',{class:'field',id:'nick',maxlength:'20',placeholder:'Например, Dana',autocomplete:'off',value:P.name||''});
+  function ok(){
+    var v=input.value.replace(/\s+/g,' ').trim().slice(0,20);
+    if(!v){input.focus();return}
+    P.name=v; saveLocal(); if(P.xp||P.played) pushRemote();
+    go('home');
+  }
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')ok()});
+  $app.replaceChildren(
+    h('div',{class:'hero',style:'margin-top:40px'},h('h1',{},'Kelime Oyunu'),h('div',{class:'byline'},'by yerlandana'),h('p',{},'Как тебя показывать в рейтинге?')),
+    h('div',{class:'namebox'},h('label',{for:'nick',class:'sub'},'Имя или ник, до 20 символов'),input,
+      h('button',{class:'btn block',onclick:ok},P.name?'Сохранить':'Начать')));
+  setTimeout(function(){input.focus()},50);
+}
+
+/* ---------- game plumbing ---------- */
+var G=null;
+function shell(m){
+  clearTimers(); S.view='game';
+  var meta=h('div',{class:'meta'}), bar=h('i'), body=h('div',{class:'stage'});
+  $app.replaceChildren(
+    h('div',{class:'gamehead'},
+      h('button',{class:'ghost','aria-label':'Выйти',onclick:function(){go('home')}},icon('back')),
+      h('div',{class:'gtitle'},m.name),meta),
+    h('div',{class:'bar'},bar),body);
+  window.scrollTo(0,0);
+  return {body:body,meta:meta,bar:bar};
+}
+function newGame(id){
+  G={id:id,score:0,right:0,total:0,streak:0,best:0,missed:[],ui:shell(MODE[id])};
+  return G;
+}
+function bonus(){return Math.min(G.streak,5)*2}
+function finish(opts){
+  clearTimers();
+  opts=opts||{};
+  var score=Math.max(0,Math.round(G.score)), xp=opts.xp!=null?opts.xp:score;
+  var prev=P.best[G.id]||0, isBest=score>prev&&score>0;
+  P.xp+=xp; P.played+=1; if(isBest) P.best[G.id]=score;
+  saveLocal(); pushRemote();
+  S.view='result';
+  var acc=G.total?Math.round(G.right/G.total*100):0;
+  var seen={}, missed=G.missed.filter(function(w){if(seen[w.tr])return false;seen[w.tr]=1;return true});
+  var id=G.id;
+  $app.replaceChildren(
+    h('div',{class:'gamehead'},h('div',{class:'gtitle'},MODE[id].name),h('div',{class:'meta'},'итог')),
+    h('div',{class:'stage'},
+      isBest?h('span',{class:'badge'},'Новый рекорд'):null,
+      h('div',{class:'score'},String(score)),
+      h('div',{class:'stats'},
+        h('div',{},h('b',{},'+'+xp),'очков в рейтинг'),
+        G.total?h('div',{},h('b',{},acc+'%'),'верно'):null,
+        h('div',{},h('b',{},'ур. '+level(P.xp)),String(P.xp)+' очков всего')),
+      missed.length?h('div',{},h('h3',{style:'margin:8px 0 10px;font-size:16px'},'Повтори эти слова'),
+        h('ul',{class:'missed'},missed.map(function(w){return h('li',{},h('span',{class:'a'},w.tr),h('span',{class:'b'},w.ru))}))):null,
+      h('div',{class:'actions',style:'margin-top:8px'},
+        h('button',{class:'btn',onclick:function(){startMode(id)}},'Ещё раз'),
+        h('button',{class:'btn alt',onclick:function(){go('board')}},'Рейтинг'),
+        h('button',{class:'btn alt',onclick:function(){go('home')}},'Режимы'))));
+  window.scrollTo(0,0);
+}
+function startMode(id){
+  ({cards:modeCards,tr2ru:function(){modeQuiz('tr2ru')},ru2tr:function(){modeQuiz('ru2tr')},listen:function(){modeQuiz('listen')},write:modeWrite,match:modeMatch,letters:modeLetters,blitz:modeBlitz})[id]();
+}
+function setMeta(){G.ui.meta.textContent=G.score+' очк.'}
+function keysFor(count,cb){
+  document.onkeydown=function(e){
+    var n=parseInt(e.key,10);
+    if(n>=1&&n<=count) cb(n-1);
+  };
+}
+
+/* ---------- mode: flashcards ---------- */
+function modeCards(){
+  newGame('cards');
+  var deck=take(10), i=0, flipped=false, N=deck.length;
+  function draw(){
+    var w=deck[i];
+    G.ui.bar.style.width=(i/N*100)+'%'; G.ui.meta.textContent=(i+1)+' / '+N;
+    var card=flipped
+      ? h('button',{class:'card back',onclick:function(){flipped=false;draw()}},h('span',{class:'tag'},'Перевод'),h('div',{class:'prompt ru'},w.ru),h('div',{class:'reveal'},w.tr),h('span',{class:'hint'},'нажми, чтобы вернуть'))
+      : h('button',{class:'card',onclick:function(){flipped=true;draw();speak(w.tr)}},h('span',{class:'tag'},w.t==='v'?'Глагол':'Слово'),h('div',{class:'prompt'},w.tr),h('span',{class:'hint'},'нажми, чтобы открыть'));
+    G.ui.body.replaceChildren(card,
+      h('div',{style:'display:flex;justify-content:flex-start'},sayBtn(w.tr)),
+      flipped?h('div',{class:'rate'},
+        h('button',{class:'btn alt',onclick:function(){rate(false)}},'Ещё раз'),
+        h('button',{class:'btn',onclick:function(){rate(true)}},'Знаю')):h('div',{class:'sub'},'Сначала попробуй вспомнить значение.'));
+  }
+  function rate(ok){
+    var w=deck[i]; G.total++;
+    if(ok){G.right++;G.score++;noteHit(w)}else{G.missed.push(w);noteMiss(w)}
+    i++; flipped=false;
+    if(i>=N) finish({xp:G.right}); else draw();
+  }
+  draw();
+}
+
+/* ---------- modes: choice quizzes ---------- */
+function modeQuiz(kind){
+  newGame(kind);
+  var qs=take(10), i=0, N=qs.length, locked=false;
+  function build(w){
+    var ds=distractors(w,3);
+    if(kind==='ru2tr'){
+      return {tag:'Как по-турецки',prompt:h('div',{class:'prompt ru'},w.ru),opts:shuffle(ds.concat(w)).map(function(x){return {label:x.tr,ok:x===w,cls:'tr'}}),say:false};
+    }
+    var opts=shuffle(ds.concat(w)).map(function(x){return {label:x.ru,ok:x===w}});
+    if(kind==='listen') return {tag:'Что ты слышишь',prompt:h('div',{style:'display:flex;align-items:center;gap:16px'},sayBtn(w.tr,true),h('div',{class:'sub',id:'lw'},'Слово скрыто, пока не ответишь')),opts:opts,say:true};
+    return {tag:'Что значит',prompt:h('div',{class:'prompt'},w.tr),opts:opts,say:false,speakBtn:true};
+  }
+  function draw(){
+    locked=false;
+    var w=qs[i], q=build(w);
+    G.ui.bar.style.width=(i/N*100)+'%'; G.ui.meta.textContent=(i+1)+' / '+N+'  ·  '+G.score;
+    var fb=h('div',{class:'fb'}), streak=h('div',{class:'streak'},G.streak>=2?'Серия '+G.streak+', бонус +'+bonus():'');
+    var btns=q.opts.map(function(o,idx){
+      var b=h('button',{class:'opt '+(o.cls||''),onclick:function(){pick(idx)}},h('kbd',{},String(idx+1)),o.label);
+      return b;
+    });
+    function pick(idx){
+      if(locked) return; locked=true;
+      var o=q.opts[idx], right=o.ok;
+      btns.forEach(function(b,j){b.disabled=true;if(q.opts[j].ok)b.classList.add('good');else if(j===idx)b.classList.add('bad')});
+      G.total++;
+      if(right){G.right++;G.streak++;G.score+=10+bonus();noteHit(w);fb.replaceChildren(h('span',{class:'msg good'},'Верно'))}
+      else{G.streak=0;G.missed.push(w);noteMiss(w);fb.replaceChildren(h('span',{class:'msg bad'},w.tr+' = '+w.ru),h('button',{class:'btn',onclick:next},'Дальше'))}
+      if(kind==='listen'){var lw=document.getElementById('lw');if(lw){lw.textContent=w.tr;lw.style.fontFamily='var(--display)';lw.style.fontSize='34px';lw.style.color='var(--text)'}}
+      else if(kind==='tr2ru') speak(w.tr);
+      G.ui.meta.textContent=(i+1)+' / '+N+'  ·  '+G.score;
+      if(right) later(next,kind==='listen'?1100:850);
+    }
+    function next(){i++;if(i>=N)finish();else draw()}
+    G.ui.body.replaceChildren(h('span',{class:'tag'},q.tag),
+      h('div',{style:'display:flex;align-items:flex-start;justify-content:space-between;gap:12px'},q.prompt,q.speakBtn?sayBtn(w.tr):null),
+      streak,h('div',{class:'opts'},btns),fb);
+    keysFor(btns.length,pick);
+    if(kind==='listen') later(function(){speak(w.tr)},250);
+  }
+  draw();
+}
+
+/* ---------- mode: write ---------- */
+function modeWrite(){
+  newGame('write');
+  var qs=take(10), i=0, N=qs.length;
+  function draw(){
+    var w=qs[i], done=false;
+    G.ui.bar.style.width=(i/N*100)+'%'; G.ui.meta.textContent=(i+1)+' / '+N+'  ·  '+G.score;
+    var input=h('input',{class:'field',id:'ans',autocomplete:'off',autocapitalize:'off',autocorrect:'off',spellcheck:'false','aria-label':'Ответ по-турецки',placeholder:'yaz...'});
+    var fb=h('div',{class:'fb'});
+    var keys=h('div',{class:'keys'},['ç','ğ','ı','ö','ş','ü'].map(function(c){
+      return h('button',{class:'key',type:'button','aria-label':'Буква '+c,onclick:function(){
+        if(done) return; var a=input.selectionStart==null?input.value.length:input.selectionStart, b=input.selectionEnd==null?a:input.selectionEnd;
+        input.value=input.value.slice(0,a)+c+input.value.slice(b); input.focus(); try{input.setSelectionRange(a+1,a+1)}catch(e){}
+      }},c);
+    }));
+    var check=h('button',{class:'btn block',onclick:submit},'Проверить');
+    function submit(){
+      if(done){next();return}
+      var v=norm(input.value); if(!v){input.focus();return}
+      done=true; input.readOnly=true; G.total++;
+      var target=norm(w.tr);
+      if(v===target){G.right++;G.streak++;G.score+=15+bonus();noteHit(w);input.classList.add('good');fb.replaceChildren(h('span',{class:'msg good'},'Верно'));later(next,900)}
+      else if(plain(v)===plain(target)){G.right++;G.streak++;G.score+=8;noteHit(w);input.classList.add('good');
+        fb.replaceChildren(h('span',{class:'msg mid'},'Почти: следи за турецкими буквами'),h('span',{class:'reveal'},w.tr));check.textContent='Дальше'}
+      else{G.streak=0;G.missed.push(w);noteMiss(w);input.classList.add('bad');
+        fb.replaceChildren(h('span',{class:'msg bad'},'Правильно:'),h('span',{class:'reveal'},w.tr));check.textContent='Дальше'}
+      speak(w.tr); G.ui.meta.textContent=(i+1)+' / '+N+'  ·  '+G.score;
+    }
+    function next(){i++;if(i>=N)finish();else draw()}
+    input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();submit()}});
+    G.ui.body.replaceChildren(h('span',{class:'tag'},w.t==='v'?'Глагол, как по-турецки':'Как по-турецки'),h('div',{class:'prompt ru'},w.ru),
+      input,keys,fb,check);
+    setTimeout(function(){input.focus()},30);
+  }
+  draw();
+}
+
+/* ---------- mode: memory match ---------- */
+function modeMatch(){
+  newGame('match');
+  var ws=take(6), tiles=[];
+  ws.forEach(function(w,k){tiles.push({k:k,side:'tr',label:w.tr});tiles.push({k:k,side:'ru',label:w.ru})});
+  tiles=shuffle(tiles);
+  var open=[], moves=0, found=0, lock=false, t0=null, els=[];
+  G.ui.meta.textContent='ходы 0';
+  var grid=h('div',{class:'grid'});
+  tiles.forEach(function(t,idx){
+    var el=h('button',{class:'mt down','aria-label':'Плитка',onclick:function(){flip(idx)}},t.label);
+    els.push(el); grid.appendChild(el);
+  });
+  G.ui.body.replaceChildren(h('p',{class:'sub'},'Открой две плитки: слово и его перевод. Каждая пара даёт больше очков, если ходов мало.'),grid);
+  function flip(idx){
+    if(lock) return; var t=tiles[idx], el=els[idx];
+    if(el.classList.contains('done')||open.indexOf(idx)>=0) return;
+    if(t0==null) t0=Date.now();
+    el.classList.remove('down'); el.classList.add('up'); if(t.side==='tr'){el.classList.add('tr');speak(t.label)}
+    open.push(idx);
+    if(open.length===2){
+      moves++; G.ui.meta.textContent='ходы '+moves; G.total++;
+      var a=tiles[open[0]], b=tiles[open[1]], ea=els[open[0]], eb=els[open[1]];
+      if(a.k===b.k){
+        G.right++; found++; ea.classList.remove('up');eb.classList.remove('up');ea.classList.add('done');eb.classList.add('done'); open=[];
+        G.ui.bar.style.width=(found/6*100)+'%';
+        if(found===6){
+          var sec=Math.round((Date.now()-t0)/1000);
+          G.score=Math.max(20,100-(moves-6)*5-Math.floor(sec/3));
+          ws.forEach(noteHit);
+          later(function(){finish()},700);
+        }
+      }else{
+        G.missed.push(ws[a.k],ws[b.k]);
+        lock=true;
+        later(function(){[ea,eb].forEach(function(e,j){var t2=tiles[open[j]];e.classList.remove('up','tr');e.classList.add('down')});open=[];lock=false},850);
+      }
+    }
+  }
+}
+
+/* ---------- mode: letters ---------- */
+function modeLetters(){
+  newGame('letters');
+  var qs=take(8,function(w){return w.tr.indexOf(' ')<0&&w.tr.length>=3&&w.tr.length<=12}), i=0, N=qs.length;
+  function draw(){
+    var w=qs[i], word=lc(w.tr), letters=word.split(''), order, tries=0, hints=0, placed=[], over=false;
+    do{order=shuffle(letters.map(function(_,k){return k}))}while(order.length>2&&order.map(function(k){return letters[k]}).join('')===word);
+    G.ui.bar.style.width=(i/N*100)+'%'; G.ui.meta.textContent=(i+1)+' / '+N+'  ·  '+G.score;
+    var slots=h('div',{class:'slots','aria-live':'polite'}), tilesEl=h('div',{class:'tiles'}), fb=h('div',{class:'fb'});
+    var hintBtn=h('button',{class:'btn alt',onclick:hint},'Подсказка (-4)');
+    function paint(){
+      slots.replaceChildren.apply(slots,letters.map(function(_,p){
+        var k=placed[p];
+        return k==null?h('span',{class:'slot'}):h('button',{class:'slot fill',onclick:function(){if(!over){placed.splice(p,1);paint()}},'aria-label':'Убрать букву'},letters[k]);
+      }));
+      tilesEl.replaceChildren.apply(tilesEl,order.map(function(k){
+        return h('button',{class:'tile',disabled:placed.indexOf(k)>=0||over,onclick:function(){place(k)}},letters[k]);
+      }));
+    }
+    function place(k){
+      if(over||placed.length>=letters.length) return;
+      placed.push(k); paint();
+      if(placed.length===letters.length) check();
+    }
+    function hint(){
+      if(over) return;
+      /* keep the correct prefix, drop the rest, then add the next right letter */
+      var good=[]; for(var p=0;p<placed.length;p++){if(letters[placed[p]]===letters[p]) good.push(placed[p]); else break}
+      placed=good;
+      var need=letters[placed.length];
+      for(var q=0;q<order.length;q++){var k=order[q]; if(placed.indexOf(k)<0&&letters[k]===need){placed.push(k);break}}
+      hints++; paint(); if(placed.length===letters.length) check();
+    }
+    function check(){
+      var got=placed.map(function(k){return letters[k]}).join('');
+      var cells=slots.children;
+      if(got===word){
+        over=true; G.total++; G.right++; G.streak++;
+        var pts=Math.max(4,12-hints*4-tries*2)+(hints||tries?0:bonus()); G.score+=pts; noteHit(w);
+        Array.prototype.forEach.call(cells,function(c){c.classList.add('good')});
+        fb.replaceChildren(h('span',{class:'msg good'},'+'+pts+'  '+w.ru)); speak(w.tr); paint();
+        G.ui.meta.textContent=(i+1)+' / '+N+'  ·  '+G.score; later(next,1100);
+      }else{
+        tries++; G.streak=0;
+        Array.prototype.forEach.call(cells,function(c){c.classList.add('bad')}); slots.classList.add('shake');
+        if(tries>=2){
+          over=true; G.total++; G.missed.push(w); noteMiss(w);
+          later(function(){fb.replaceChildren(h('span',{class:'msg bad'},'Правильно:'),h('span',{class:'reveal'},w.tr),h('button',{class:'btn',onclick:next},'Дальше'));placed=order.slice().sort(function(a,b){return a-b});paint();Array.prototype.forEach.call(slots.children,function(c){c.classList.add('bad')})},450);
+        }else{
+          later(function(){slots.classList.remove('shake');placed=[];paint()},450);
+        }
+      }
+    }
+    function next(){i++;if(i>=N)finish();else draw()}
+    G.ui.body.replaceChildren(h('span',{class:'tag'},'Собери слово'),h('div',{class:'prompt ru'},w.ru),h('div',{class:'sub'},letters.length+' букв'),slots,tilesEl,h('div',{style:'display:flex;gap:10px;flex-wrap:wrap'},hintBtn,sayBtn(w.tr)),fb);
+    paint();
+  }
+  if(!N){G.ui.body.replaceChildren(h('p',{class:'sub'},'В этом наборе нет подходящих слов.'));return}
+  draw();
+}
+
+/* ---------- mode: blitz ---------- */
+function modeBlitz(){
+  newGame('blitz');
+  var TOTAL=60, left=TOTAL, cur=null, over=false, box;
+  var pool=shuffle(poolWords().length>=6?poolWords():WORDS), idx=0;
+  function nextQ(){
+    var w=pool[idx%pool.length]; idx++;
+    var truth=Math.random()<.5, shown=w;
+    if(!truth){var o=distractors(w,1)[0]; shown=o||w; if(!o) truth=true}
+    cur={w:w,shown:shown,truth:truth};
+  }
+  function answer(sayTrue){
+    if(over) return;
+    var ok=(sayTrue===cur.truth); G.total++;
+    if(ok){G.right++;G.streak++;G.score+=10+bonus();noteHit(cur.w);flash('good')}
+    else{G.streak=0;G.score=Math.max(0,G.score-5);G.missed.push(cur.w);noteMiss(cur.w);flash('bad')}
+    nextQ(); draw(); updMeta();
+  }
+  function flash(c){if(!box)return;box.classList.add('flash-'+c);later(function(){box.classList.remove('flash-'+c)},180)}
+  function updMeta(){G.ui.meta.textContent=Math.ceil(left)+' с  ·  '+G.score}
+  function draw(){
+    box=h('div',{class:'pairbox'},h('span',{class:'tag'},'Это верный перевод?'),
+      h('div',{class:'prompt',style:'margin:10px 0 6px'},cur.w.tr),h('div',{class:'prompt ru',style:'color:var(--accent)'},cur.shown.ru));
+    G.ui.body.replaceChildren(box,h('div',{class:'streak'},G.streak>=2?'Серия '+G.streak+', бонус +'+bonus():''),
+      h('div',{class:'tf'},h('button',{class:'btn no',onclick:function(){answer(false)}},'Неверно'),h('button',{class:'btn yes',onclick:function(){answer(true)}},'Верно')),
+      h('p',{class:'note'},'Клавиши: стрелка влево, неверно. Стрелка вправо, верно.'));
+  }
+  document.onkeydown=function(e){if(e.key==='ArrowLeft')answer(false);else if(e.key==='ArrowRight')answer(true)};
+  nextQ(); draw(); updMeta();
+  var t0=Date.now();
+  every(function(){
+    left=Math.max(0,TOTAL-(Date.now()-t0)/1000);
+    G.ui.bar.style.width=(left/TOTAL*100)+'%'; updMeta();
+    if(left<=0&&!over){over=true;finish()}
+  },100);
+}
+
+/* ---------- boot ---------- */
+render();
+initDb();
+})();
+</script>
+</body>
+</html>
